@@ -13,13 +13,22 @@
 
 		</style>
 
+
+		<script src="js/jquery-3.0.0.min.js"></script>
+		<script src="js/jquery.layout-latest.js"></script>
+		<script src="jquery-ui.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				$('body').layout({ applyDefaultStyles: true });
+			});
+		</script>
+
 	</head>
 
 	<body>
 
 		<div>
 			<textarea id="code" name="code" style="display: none;">
-
 precision mediump float;
 varying vec3 vNormal;
 varying float vDepth;
@@ -37,12 +46,18 @@ void main()
 			</textarea>
 		</div>
 
+		<div class="ui-layout-center">Center</div>
+		<div class="ui-layout-north">North</div>
+		<div class="ui-layout-south">South</div>
+		<div class="ui-layout-east">East</div>
+		<div class="ui-layout-west">West</div>
+
 		<script src="js/three.js"></script>
 		<script src="js/stats.min.js"></script>
 
 		<script src="lib/codemirror.js"></script>
 		<link rel="stylesheet" href="lib/codemirror.css">
-		<link rel="stylesheet" href="theme/cobalt.css">
+		<link rel="stylesheet" href="theme/dracula.css">
 		<script src="mode/glsl/glsl.js"></script>
 		<style type="text/css">
 			.CodeMirror 
@@ -59,11 +74,10 @@ void main()
 				document.getElementById("code"),
 				// options
 				{
-					value: "function myScript(){return 100;}\n",
 					mode: "text/x-glsl",
 					lineNumbers: true,
 					viewportMargin: Infinity,
-					theme: "cobalt",
+					theme: "dracula",
 					lineWrapping: true,
 				}
 			);
