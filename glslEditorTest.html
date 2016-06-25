@@ -13,13 +13,16 @@
 
 		</style>
 
-
-		<script src="js/jquery-3.0.0.min.js"></script>
+		<script src="js/jquery-latest.js"></script>
+		<!-- <script src="js/jquery-ui.min.js"></script> -->
 		<script src="js/jquery.layout-latest.js"></script>
-		<script src="jquery-ui.min.js"></script>
+		<!-- <script src="js/jquery.ui.all.js"></script> -->
 		<script>
 			$(document).ready(function () {
-				$('body').layout({ applyDefaultStyles: true });
+				$('body').layout({ 
+					applyDefaultStyles: true,
+					east__size: 0.5,
+				});
 			});
 		</script>
 
@@ -27,7 +30,15 @@
 
 	<body>
 
-		<div>
+
+		<div class="ui-layout-center">Center</div>
+		<!-- <div class="ui-layout-north">North</div> -->
+		<!-- <div class="ui-layout-south">South</div> -->
+		<!-- <div class="ui-layout-east">East</div> -->
+		<!-- <div class="ui-layout-west">West</div> -->
+
+		<div class="ui-layout-east">
+
 			<textarea id="code" name="code" style="display: none;">
 precision mediump float;
 varying vec3 vNormal;
@@ -44,13 +55,8 @@ void main()
 	gl_Position = pos;
 }
 			</textarea>
-		</div>
 
-		<div class="ui-layout-center">Center</div>
-		<div class="ui-layout-north">North</div>
-		<div class="ui-layout-south">South</div>
-		<div class="ui-layout-east">East</div>
-		<div class="ui-layout-west">West</div>
+		</div>
 
 		<script src="js/three.js"></script>
 		<script src="js/stats.min.js"></script>
@@ -62,7 +68,7 @@ void main()
 		<style type="text/css">
 			.CodeMirror 
 			{
-				/*border: 5px solid #eee;*/
+				border: 5px solid #eee;
 				height: auto;
 			}
 		</style>
