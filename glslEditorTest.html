@@ -23,15 +23,16 @@
 				bodyLayout = $('body').layout({ 
 					applyDefaultStyles: true,
 					// livePaneResizing: true,
-					east__size: 0.5,
-					east__slidable: false,
-					east__resizable: true,
-					east__animatePaneSizing: true,
-					east__allowOverflow: true,
-					east__spacing_open: 	10,
-					east__spacing_closed: 	10,
-					east__fxSpeed_size: "fast",
-					onresize_end: resize
+					east__size:					0.5,
+					east__slidable:				false,
+					east__resizable:			true,
+					east__animatePaneSizing:	true,
+					east__allowOverflow:		true,
+					east__spacing_open:			10,
+					east__spacing_closed:		10,
+					east__fxSpeed_size:			"fast",
+					east__enableCursorHotkey:	false,
+					onresize_end:				resize
 					// east__onresize: function () {
 					// 	console.log(
 					// 		$("#ui-center").width(),
@@ -97,6 +98,13 @@ void main()
 		</style>
 
 		<script type="text/javascript">
+
+			var run = function () {
+				console.log("run() not set");
+			};
+			var save = function () {
+				console.log("save() not set");
+			};
 			
 			var editor = CodeMirror.fromTextArea(
 				// element
@@ -110,16 +118,16 @@ void main()
 					lineWrapping: true,
 					extraKeys: {
 						"Ctrl-R": function () {
-							alert("run");
+							run();
 						},
 						"Cmd-R": function () {
-							alert("run");
+							// run();
 						},
 						"Ctrl-S": function () {
-							alert("save");
+							save();
 						},
 						"Cmd-S": function () {
-							alert("save");
+							save();
 						},
 					}
 				}
@@ -234,13 +242,20 @@ void main()
 
 			function updateShader() {
 
-				// mesh.material = new THREE.ShaderMaterial( {
+				console.log("previous id = ", mesh.material.program.id);
 
-				// 	vertexShader: vertexShader,
-				// 	fragmentShader: $("#code").val(),
-				// 	shading: THREE.SmoothShading
-				// } );
+				renderer.context.deleteProgram(mesh.material.program.id);
+
+				mesh.material = new THREE.ShaderMaterial( {
+
+					vertexShader: vertexShader,
+					fragmentShader: editor.getValue(),
+					shading: THREE.SmoothShading
+				} );
 			}
+
+			// set run()
+			run = updateShader;
 
 			// editor.on("change", function() {
 			// 	console.log(editor.getValue());
