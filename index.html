@@ -1,1 +1,274 @@
-page
+<html>
+
+	<head>
+
+		<title>
+			ShaderMate: Honey, does this shader make my butt look big?
+		</title>
+
+		<style>
+
+			/*body { margin: 0; width: 100%; height: 100%; }*/
+			/*canvas { width: 100%; height: 100%; }*/
+
+		</style>
+
+		<script src="js/jquery-latest.js"></script>
+		<script src="js/jquery-ui-latest.js"></script>
+		<script src="js/jquery.layout-latest.js"></script>
+		<!-- <script src="js/jquery.ui.all.js"></script> -->
+		<script>
+			var bodyLayout;
+			$(document).ready(function () {
+				bodyLayout = $('body').layout({ 
+					applyDefaultStyles: true,
+					// livePaneResizing: true,
+					east__size:					0.5,
+					east__slidable:				false,
+					east__resizable:			true,
+					east__animatePaneSizing:	true,
+					east__allowOverflow:		true,
+					east__spacing_open:			10,
+					east__spacing_closed:		10,
+					east__fxSpeed_size:			"fast",
+					east__enableCursorHotkey:	false,
+					onresize_end:				resize
+					// east__onresize: function () {
+					// 	console.log(
+					// 		$("#ui-center").width(),
+					// 		$("#ui-center").height()
+					// 	);
+					// },
+					// east__fxSpeed_open: 1000,
+				});
+				resize();
+			});
+		</script>
+
+	</head>
+
+	<body>
+
+
+		<div id="ui-center" class="ui-layout-center"></div>
+
+		<div class="ui-layout-east" style="padding: 0;">
+
+		<!-- <div style="padding:5px; margin:2px;">Mesh Fragment Shader</div> -->
+
+			<textarea id="code" name="code" style="display: none;"></textarea>
+
+		</div>
+
+		<script src="js/three.js"></script>
+		<script src="js/stats.min.js"></script>
+
+		<script src="lib/codemirror.js"></script>
+		<script src="keymap/sublime.js"></script>
+		<link rel="stylesheet" href="lib/codemirror.css">
+		<link rel="stylesheet" href="theme/monokai.css">
+		<script src="mode/glsl/glsl.js"></script>
+		<style type="text/css">
+			.CodeMirror 
+			{
+				height: auto;
+			}
+			.ui-layout-pane
+			{
+				padding:0 !important;
+				border:0 !important;
+				overflow:hidden !important;
+			}
+		</style>
+
+		<script type="text/javascript">
+
+			var run = function () {
+				console.warn("run() not set");
+			};
+			var save = function () {
+				console.warn("save() not set");
+			};
+			
+			var initCode = "";
+
+			if (document.cookie === "") {				
+
+				initCode = 
+					"varying vec3 vNormal;\n" +
+					"varying float vDepth;\n" +
+					"\n" +
+					"void main() \n" +
+					"{\n" +
+					"\tvec3 nNormal = normalize(vNormal);\n" +
+					"\n" +
+					"\tvec3 nCol = vec3(0.5+0.5*nNormal);\n" +
+					"\n" +
+					"\tvec3 outCol = floor(5.0*nCol)/5.0;\n" +
+					"\n" +
+					"\tgl_FragColor = vec4(outCol, 1.0);\n" +
+					"}";
+			}
+			else {
+
+				initCode = document.cookie;
+			}
+
+			var editor = CodeMirror.fromTextArea(
+				// element
+				document.getElementById("code"),
+				// options
+				{
+					value: initCode,
+					mode: "text/x-glsl",
+					tabSize: 4,
+					indentUnit: 4,
+					lineNumbers: true,
+					viewportMargin: Infinity,
+					theme: "monokai",
+					lineWrapping: true,
+					keyMap: "sublime",
+					extraKeys: {
+						"Ctrl-R": function () {
+							run();
+						},
+						"Cmd-R": function () {
+							run();
+						},
+						"Ctrl-S": function () {
+							save();
+						},
+						"Cmd-S": function () {
+							save();
+						},
+					}
+				}
+			);
+
+			editor.setValue(initCode);			
+
+		</script>
+
+		<script type="text/javascript">
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer({antialias:false});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setClearColor(0x272822);
+			$("#ui-center").append( renderer.domElement );
+
+			var geometry = new THREE.TorusKnotBufferGeometry( 1 , 0.3 , 64 , 32 );
+			// var geometry = new THREE.SphereGeometry( 1 , 12, 12 );
+			// var geometry = new THREE.BoxGeometry( 1,1,1 );
+
+			var dLight = new THREE.DirectionalLight( 0xFFFFFF , 0.5 );
+			dLight.position.set(1,1,1);
+			scene.add(dLight);
+
+			var aLight = new THREE.AmbientLight( 0x7F7F7F );
+			scene.add(aLight);
+
+			vertexShader = [
+				'precision mediump float;',
+				'varying vec3 vNormal;',
+				'varying float vDepth;',
+				'void main() ',
+				'{',
+					'vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;',
+					'vec4 pos = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+					// 'vDepth = (2.0 * pos.z - 0.1 - 1000.0) / (1000.0 - 0.1) / pos.w;',
+					'float zFar = 1000.0;',
+					'float zNear = 0.1;',
+					'vDepth = 2.0*zFar*zNear / (zFar + zNear - (zFar - zNear)*(2.0*pos.z - 1.0));',
+					// 'vDepth = pos.z;',
+					'gl_Position = pos;',
+				'}',
+			].join('\n');
+
+			var material = new THREE.ShaderMaterial( {
+				vertexShader: vertexShader,
+				fragmentShader: initCode,
+				shading: THREE.SmoothShading
+			} );
+
+			material.needsUpdate = true;
+
+			var mesh = new THREE.Mesh( geometry, material );
+			scene.add( mesh );
+			camera.position.z = 5;
+
+			var stats = new Stats();
+			stats.setMode( 0 );
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.left = '0px';
+			stats.domElement.style.top = '0px';
+			$("#ui-center").append( stats.domElement );
+
+			animate();
+			function animate () {
+
+				mesh.rotation.x += 0.005;
+				mesh.rotation.y += 0.005;
+
+				requestAnimationFrame(animate);
+				render();
+			}
+			function render()
+			{
+				renderer.render(scene, camera);
+
+				stats.update();
+			}
+
+			function resize() {
+				var w = $("#ui-center").width();
+				var h = $("#ui-center").height();
+				// console.log(w, h);
+				renderer.setSize( w , h );
+				camera.aspect = w / h;
+				camera.updateProjectionMatrix();
+			};
+			resize();
+
+			function updateShader() {
+
+				mesh.material = new THREE.ShaderMaterial( {
+
+					vertexShader: vertexShader,
+					fragmentShader: editor.getValue(),
+					shading: THREE.SmoothShading
+				} );
+
+				renderer.render(scene, camera);
+
+				var gl = renderer.getContext();
+
+				var shader = gl.createShader( gl.FRAGMENT_SHADER );
+
+				var fragShaderString = "precision highp float; precision highp int; \t" + editor.getValue();
+
+				gl.shaderSource( shader, fragShaderString );
+				gl.compileShader( shader );
+
+				if ( gl.getShaderInfoLog( shader ) !== '' ) {
+					console.log(gl.getShaderInfoLog( shader ));
+				}
+				else {
+					save();
+				}
+			}
+
+			function save() {
+				document.cookie = editor.getValue();
+				console.log("saved");
+			}
+
+			// set run()
+			run = updateShader;
+
+		</script>
+
+	</body>
+
+</html>
