@@ -51,10 +51,6 @@
 
 
 		<div id="ui-center" class="ui-layout-center"></div>
-		<!-- <div class="ui-layout-north">North</div> -->
-		<!-- <div class="ui-layout-south">South</div> -->
-		<!-- <div class="ui-layout-east">East</div> -->
-		<!-- <div class="ui-layout-west">West</div> -->
 
 		<div class="ui-layout-east" style="padding: 0;">
 
@@ -69,11 +65,10 @@ void main()
 	vec3 l = normalize(vec3(1.0));
 	vec3 nNormal = normalize(vNormal);
 	float NDotL = dot(nNormal, l);
-	// comment
+
 	vec3 outCol = vec3(0.5+0.5*nNormal);
 	gl_FragColor = vec4(outCol, 1.0);
-}
-</textarea>
+}</textarea>
 
 		</div>
 
@@ -121,7 +116,7 @@ void main()
 							run();
 						},
 						"Cmd-R": function () {
-							// run();
+							run();
 						},
 						"Ctrl-S": function () {
 							save();
@@ -144,7 +139,7 @@ void main()
 			renderer.setClearColor(0x282A36)
 			$("#ui-center").append( renderer.domElement );
 
-			var geometry = new THREE.TorusKnotGeometry( 1 , 0.3 , 64 , 32 );
+			var geometry = new THREE.TorusKnotBufferGeometry( 1 , 0.3 , 64 , 32 );
 			// var geometry = new THREE.SphereGeometry( 1 , 12, 12 );
 			// var geometry = new THREE.BoxGeometry( 1,1,1 );
 
@@ -172,30 +167,9 @@ void main()
 				'}',
 			].join('\n');
 
-			var testFragmentShader = [
-
-				// 'precision mediump float;',
-
-				// from vert shader
-				'varying vec3 vNormal;',
-				'varying float vDepth;',
-				
-				'void main() ',
-				'{',
-					'vec3 nNormal = normalize(vNormal);',
-					'float NDotL = 0.0;',
-					// 'for (int i = 0; i < NUM_DIR_LIGHTS; i++)',
-						// 'NDotL += dot(nNormal, directionalLightDirection[i]);',
-						// 'NDotL += 0.2;',
-					'vec3 outCol = vec3(0.5+0.5*nNormal);',
-					'gl_FragColor = vec4(outCol, 1.0);',
-				'}'
-
-			].join('\n');
-
 			var material = new THREE.ShaderMaterial( {
 				vertexShader: vertexShader,
-				fragmentShader: testFragmentShader,
+				fragmentShader: editor.getValue(),
 				shading: THREE.SmoothShading
 			} );
 
@@ -236,15 +210,9 @@ void main()
 				camera.aspect = w / h;
 				camera.updateProjectionMatrix();
 			};
-			// window.addEventListener( 'resize', resize, false );
 			resize();
-			// bodyLayout.option["center"].onresize = resize();
 
 			function updateShader() {
-
-				console.log("previous id = ", mesh.material.program.id);
-
-				renderer.context.deleteProgram(mesh.material.program.id);
 
 				mesh.material = new THREE.ShaderMaterial( {
 
@@ -252,24 +220,36 @@ void main()
 					fragmentShader: editor.getValue(),
 					shading: THREE.SmoothShading
 				} );
+
+				renderer.render(scene, camera);
+
+				var gl = renderer.getContext();
+
+				var shader = gl.createShader( gl.FRAGMENT_SHADER );
+
+				var fragShaderString = "precision highp float;" + editor.getValue();
+
+				gl.shaderSource( shader, fragShaderString );
+				gl.compileShader( shader );
+
+				if ( gl.getShaderParameter( shader, gl.COMPILE_STATUS ) === false ) {
+
+					// console.error( 'THREE.WebGLShader: Shader couldn\'t compile.' );
+
+				}
+
+				if ( gl.getShaderInfoLog( shader ) !== '' ) {
+
+					// console.warn( 'THREE.WebGLShader: gl.getShaderInfoLog()', type === gl.VERTEX_SHADER ? 'vertex' : 'fragment', gl.getShaderInfoLog( shader ), addLineNumbers( fragShaderString ) );
+
+					console.log(gl.getShaderInfoLog( shader ));
+
+				}
 			}
 
 			// set run()
 			run = updateShader;
 
-			// editor.on("change", function() {
-			// 	console.log(editor.getValue());
-			// });
-			
-			// editor.on("change", function(arg0, arg1) {
-			// 	// console.log(editor.getValue());
-			// 	console.log(arg1);
-			// });
-			
-			// editor.on("keyHandled", function(cm, name, event) {
-			// 	// console.log(editor.getValue());
-			// 	console.log(name);
-			// });
 		</script>
 
 	</body>
