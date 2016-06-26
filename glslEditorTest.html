@@ -84,10 +84,10 @@
 		<script type="text/javascript">
 
 			var run = function () {
-				console.log("run() not set");
+				console.warn("run() not set");
 			};
 			var save = function () {
-				console.log("save() not set");
+				console.warn("save() not set");
 			};
 			
 			var initCode = "";
@@ -255,7 +255,7 @@
 					console.log(gl.getShaderInfoLog( shader ));
 				}
 				else {
-					console.log("saved");
+					save();
 				}
 			}
 
