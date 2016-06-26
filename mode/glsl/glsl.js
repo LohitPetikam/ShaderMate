@@ -1,3 +1,5 @@
+// By mrdoob https://github.com/mrdoob/glsl-sandbox/blob/master/static/js/glsl.js
+
 CodeMirror.defineMode("glsl", function(config, parserConfig) {
   var indentUnit = config.indentUnit,
       keywords = parserConfig.keywords || {},

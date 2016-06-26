@@ -120,7 +120,7 @@ void main()
 			var renderer = new THREE.WebGLRenderer({antialias:false});
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			renderer.setClearColor(0x555555)
-			document.getElementById("ui-center").appendChild( renderer.domElement );
+			$("#ui-center").append( renderer.domElement );
 
 			var geometry = new THREE.TorusKnotGeometry( 1 , 0.3 , 64 , 32 );
 			// var geometry = new THREE.SphereGeometry( 1 , 12, 12 );
@@ -150,7 +150,7 @@ void main()
 				'}',
 			].join('\n');
 
-			testFragmentShader = [
+			var testFragmentShader = [
 
 				// 'precision mediump float;',
 
@@ -166,6 +166,27 @@ void main()
 						// 'NDotL += dot(nNormal, directionalLightDirection[i]);',
 						// 'NDotL += 0.2;',
 					'vec3 outCol = vec3(0.5+0.5*nNormal);',
+					'gl_FragColor = vec4(outCol, 1.0);',
+				'}'
+
+			].join('\n');
+
+			var testFragmentShader2 = [
+
+				// 'precision mediump float;',
+
+				// from vert shader
+				'varying vec3 vNormal;',
+				'varying float vDepth;',
+				
+				'void main() ',
+				'{',
+					'vec3 nNormal = normalize(vNormal);',
+					'float NDotL = 0.0;',
+					// 'for (int i = 0; i < NUM_DIR_LIGHTS; i++)',
+						// 'NDotL += dot(nNormal, directionalLightDirection[i]);',
+						// 'NDotL += 0.2;',
+					'vec3 outCol = vec3(nNormal);',
 					'gl_FragColor = vec4(outCol, 1.0);',
 				'}'
 
@@ -188,7 +209,7 @@ void main()
 			stats.domElement.style.position = 'absolute';
 			stats.domElement.style.left = '0px';
 			stats.domElement.style.top = '0px';
-			document.body.appendChild( stats.domElement );
+			$("#ui-center").append( stats.domElement );
 
 			animate();
 			function animate () {
@@ -209,15 +230,19 @@ void main()
 			function resize() {
 				var w = $("#ui-center").width();
 				var h = $("#ui-center").height();
-				console.log(w, h);
+				// console.log(w, h);
 				renderer.setSize( w , h );
 				camera.aspect = w / h;
 				camera.updateProjectionMatrix();
 			};
 			// window.addEventListener( 'resize', resize, false );
 			resize();
-
 			// bodyLayout.option["center"].onresize = resize();
+
+			function updateShader() {
+
+				
+			}
 		</script>
 
 	</body>
