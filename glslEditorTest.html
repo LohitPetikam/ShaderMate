@@ -98,7 +98,7 @@ void main()
 
 		<script type="text/javascript">
 			
-			var myCodeMirror = CodeMirror.fromTextArea(
+			var editor = CodeMirror.fromTextArea(
 				// element
 				document.getElementById("code"),
 				// options
@@ -108,6 +108,20 @@ void main()
 					viewportMargin: Infinity,
 					theme: "dracula",
 					lineWrapping: true,
+					extraKeys: {
+						"Ctrl-R": function () {
+							alert("run");
+						},
+						"Cmd-R": function () {
+							alert("run");
+						},
+						"Ctrl-S": function () {
+							alert("save");
+						},
+						"Cmd-S": function () {
+							alert("save");
+						},
+					}
 				}
 			);
 
@@ -119,7 +133,7 @@ void main()
 
 			var renderer = new THREE.WebGLRenderer({antialias:false});
 			renderer.setSize( window.innerWidth, window.innerHeight );
-			renderer.setClearColor(0x555555)
+			renderer.setClearColor(0x282A36)
 			$("#ui-center").append( renderer.domElement );
 
 			var geometry = new THREE.TorusKnotGeometry( 1 , 0.3 , 64 , 32 );
@@ -166,27 +180,6 @@ void main()
 						// 'NDotL += dot(nNormal, directionalLightDirection[i]);',
 						// 'NDotL += 0.2;',
 					'vec3 outCol = vec3(0.5+0.5*nNormal);',
-					'gl_FragColor = vec4(outCol, 1.0);',
-				'}'
-
-			].join('\n');
-
-			var testFragmentShader2 = [
-
-				// 'precision mediump float;',
-
-				// from vert shader
-				'varying vec3 vNormal;',
-				'varying float vDepth;',
-				
-				'void main() ',
-				'{',
-					'vec3 nNormal = normalize(vNormal);',
-					'float NDotL = 0.0;',
-					// 'for (int i = 0; i < NUM_DIR_LIGHTS; i++)',
-						// 'NDotL += dot(nNormal, directionalLightDirection[i]);',
-						// 'NDotL += 0.2;',
-					'vec3 outCol = vec3(nNormal);',
 					'gl_FragColor = vec4(outCol, 1.0);',
 				'}'
 
@@ -241,8 +234,27 @@ void main()
 
 			function updateShader() {
 
-				
+				// mesh.material = new THREE.ShaderMaterial( {
+
+				// 	vertexShader: vertexShader,
+				// 	fragmentShader: $("#code").val(),
+				// 	shading: THREE.SmoothShading
+				// } );
 			}
+
+			// editor.on("change", function() {
+			// 	console.log(editor.getValue());
+			// });
+			
+			// editor.on("change", function(arg0, arg1) {
+			// 	// console.log(editor.getValue());
+			// 	console.log(arg1);
+			// });
+			
+			// editor.on("keyHandled", function(cm, name, event) {
+			// 	// console.log(editor.getValue());
+			// 	console.log(name);
+			// });
 		</script>
 
 	</body>
