@@ -6,28 +6,20 @@
 			ShaderMate: Honey, does this shader make my butt look big?
 		</title>
 
-		<style>
-
-			/*body { margin: 0; width: 100%; height: 100%; }*/
-			/*canvas { width: 100%; height: 100%; }*/
-
-		</style>
-
 		<script src="js/cookie.js"></script>
 
 		<script src="js/jquery-latest.js"></script>
 		
 		<script src="js/notify.js"></script>
-		
+
 		<script src="js/jquery-ui-latest.js"></script>
 		<script src="js/jquery.layout-latest.js"></script>
-		<!-- <script src="js/jquery.ui.all.js"></script> -->
+
 		<script>
 			var bodyLayout;
 			$(document).ready(function () {
 				bodyLayout = $('body').layout({ 
 					applyDefaultStyles: true,
-					// livePaneResizing: true,
 					east__size:					0.5,
 					east__slidable:				false,
 					east__resizable:			true,
@@ -38,13 +30,6 @@
 					east__fxSpeed_size:			"fast",
 					east__enableCursorHotkey:	false,
 					onresize_end:				resize
-					// east__onresize: function () {
-					// 	console.log(
-					// 		$("#ui-center").width(),
-					// 		$("#ui-center").height()
-					// 	);
-					// },
-					// east__fxSpeed_open: 1000,
 				});
 				resize();
 			});
@@ -59,9 +44,7 @@
 
 		<div class="ui-layout-east" style="padding: 0;">
 
-		<!-- <div style="padding:5px; margin:2px;">Mesh Fragment Shader</div> -->
-
-			<textarea id="code" name="code" style="display: none;"></textarea>
+		<textarea id="code" name="code" style="display: none;"></textarea>
 
 		</div>
 
@@ -69,6 +52,15 @@
 		<script src="js/stats.min.js"></script>
 
 		<script src="lib/codemirror.js"></script>
+		<script src="addon/search/searchcursor.js"></script>
+		<script src="addon/search/search.js"></script>
+		<script src="addon/dialog/dialog.js"></script>
+		<script src="addon/edit/matchbrackets.js"></script>
+		<script src="addon/edit/closebrackets.js"></script>
+		<script src="addon/comment/comment.js"></script>
+		<script src="addon/wrap/hardwrap.js"></script>
+		<script src="addon/fold/foldcode.js"></script>
+		<script src="addon/fold/brace-fold.js"></script>
 		<script src="keymap/sublime.js"></script>
 		<link rel="stylesheet" href="lib/codemirror.css">
 		<link rel="stylesheet" href="theme/monokai.css">
@@ -100,18 +92,22 @@
 			if (!checkCookie("code")) {				
 
 				initCode = 
+					"// incoming linearly interpolated (lerped) normal from vertex shader\n" +
 					"varying vec3 vNormal;\n" +
-					"varying float vDepth;\n" +
 					"\n" +
-					"void main() \n" +
+					"void main() // run this code \n" +
 					"{\n" +
-					"\tvec3 nNormal = normalize(vNormal);\n" +
+					"\t// normalize the lerped normal \n" +
+					"\tvec3 nNormal = normalize(vNormal); // lerping doesn't ensure length = 1\n" +
 					"\n" +
+					"\t// remap to [0.0, 1.0] range\n" +
 					"\tvec3 nCol = vec3(0.5+0.5*nNormal);\n" +
 					"\n" +
+					"\t// round that sucker\n" +
 					"\tvec3 outCol = floor(5.0*nCol)/5.0;\n" +
 					"\n" +
-					"\tgl_FragColor = vec4(outCol, 1.0);\n" +
+					"\t// finally set the output colour\n" +
+					"\tgl_FragColor = vec4(outCol, 1.0); // a e s t h e t i c\n" +
 					"}";
 			}
 			else {
@@ -242,6 +238,21 @@
 
 			function updateShader() {
 
+				var gl = renderer.getContext();
+				var shader = gl.createShader( gl.FRAGMENT_SHADER );
+				var fragShaderString = "precision highp float; precision highp int; \t" + editor.getValue();
+				gl.shaderSource( shader, fragShaderString );
+				gl.compileShader( shader );
+				if ( gl.getShaderInfoLog( shader ) !== '' ) {
+					var message = gl.getShaderInfoLog( shader );
+					$.notify(message, "error", { clickToHis:true });
+					return;
+				}
+				else {
+					save(true);
+					$.notify("Shader Updated.", "Success");
+				}
+
 				mesh.material = new THREE.ShaderMaterial( {
 
 					vertexShader: vertexShader,
@@ -250,33 +261,15 @@
 				} );
 
 				renderer.render(scene, camera);
-
-				var gl = renderer.getContext();
-
-				var shader = gl.createShader( gl.FRAGMENT_SHADER );
-
-				var fragShaderString = "precision highp float; precision highp int; \t" + editor.getValue();
-
-				gl.shaderSource( shader, fragShaderString );
-				gl.compileShader( shader );
-
-				if ( gl.getShaderInfoLog( shader ) !== '' ) {
-					var message = gl.getShaderInfoLog( shader );
-					$.notify(message, "error", { clickToHis:true });
-				}
-				else {
-
-					save();
-					$.notify("Shader Updated.", "Success");					
-				}
 			}
 
 			// set save()
-			save = function() {
+			save = function(preventNotify) {
 				var code = editor.getValue();
 				var encoded = encodeURIComponent(code);
 				setCookie("code", encoded, 5);
-				$.notify("Saved.", "Success");
+				if (!preventNotify)
+					$.notify("Saved.", "Success");
 			};
 
 			// set run()
