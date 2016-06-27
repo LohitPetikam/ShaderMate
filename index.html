@@ -16,6 +16,9 @@
 		<script src="js/cookie.js"></script>
 
 		<script src="js/jquery-latest.js"></script>
+		
+		<script src="js/notify.js"></script>
+		
 		<script src="js/jquery-ui-latest.js"></script>
 		<script src="js/jquery.layout-latest.js"></script>
 		<!-- <script src="js/jquery.ui.all.js"></script> -->
@@ -148,7 +151,9 @@
 				}
 			);
 
-			editor.setValue(initCode);			
+			editor.setValue(initCode);
+
+			$.notify.defaults({ style: 'bootstrap' });
 
 		</script>
 
@@ -209,6 +214,7 @@
 			$("#ui-center").append( stats.domElement );
 
 			animate();
+			$.notify("Running", "info");
 			function animate () {
 
 				mesh.rotation.x += 0.005;
@@ -255,10 +261,14 @@
 				gl.compileShader( shader );
 
 				if ( gl.getShaderInfoLog( shader ) !== '' ) {
-					console.log(gl.getShaderInfoLog( shader ));
+					var message = gl.getShaderInfoLog( shader );
+					$.notify(message, "error", { clickToHis:true });
 				}
+				else {
 
-				save();
+					save();
+					$.notify("Shader Updated.", "Success");					
+				}
 			}
 
 			// set save()
@@ -266,7 +276,7 @@
 				var code = editor.getValue();
 				var encoded = encodeURIComponent(code);
 				setCookie("code", encoded, 5);
-				console.log("saved", document.cookie);
+				$.notify("Saved.", "Success");
 			};
 
 			// set run()
