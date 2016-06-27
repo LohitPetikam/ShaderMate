@@ -210,7 +210,16 @@
 			$("#ui-center").append( stats.domElement );
 
 			animate();
-			$.notify("Running", "info");
+			
+
+			$.notify(
+				"ShaderMate\n" +
+				"Run: Ctrl-R\n" +
+				"Save: Ctrl-S\n",
+				"info"
+			);
+
+
 			function animate () {
 
 				mesh.rotation.x += 0.005;
@@ -245,7 +254,7 @@
 				gl.compileShader( shader );
 				if ( gl.getShaderInfoLog( shader ) !== '' ) {
 					var message = gl.getShaderInfoLog( shader );
-					$.notify(message, "error", { clickToHis:true });
+					$.notify(message, "error", { clickToHide:true });
 					return;
 				}
 				else {
