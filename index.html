@@ -98,6 +98,9 @@
 					"// incoming linearly interpolated (lerped) normal from vertex shader\n" +
 					"varying vec3 vNormal;\n" +
 					"\n" +
+					"// incoming lerped world position from vertex shader\n" +
+					"varying vec3 vPosition;\n" +
+					"\n" +
 					"void main() // run this code \n" +
 					"{\n" +
 					"\t// normalize the lerped normal \n" +
@@ -179,17 +182,17 @@
 			vertexShader = [
 				'precision mediump float;',
 				'varying vec3 vNormal;',
-				'varying float vDepth;',
+				'varying vec3 vPosition;',
+				// 'varying float vDepth;',
 				'void main() ',
 				'{',
 					'vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;',
-					'vec4 pos = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-					// 'vDepth = (2.0 * pos.z - 0.1 - 1000.0) / (1000.0 - 0.1) / pos.w;',
-					'float zFar = 1000.0;',
-					'float zNear = 0.1;',
-					'vDepth = 2.0*zFar*zNear / (zFar + zNear - (zFar - zNear)*(2.0*pos.z - 1.0));',
-					// 'vDepth = pos.z;',
-					'gl_Position = pos;',
+					'vec4 pos = modelMatrix * vec4(position, 1.0);',
+					// 'float zFar = 1000.0;',
+					// 'float zNear = 0.1;',
+					// 'vDepth = 2.0*zFar*zNear / (zFar + zNear - (zFar - zNear)*(2.0*pos.z - 1.0));',
+					'vPosition = pos.xyz;',
+					'gl_Position = projectionMatrix * viewMatrix * pos;',
 				'}',
 			].join('\n');
 
@@ -252,7 +255,11 @@
 
 				var gl = renderer.getContext();
 				var shader = gl.createShader( gl.FRAGMENT_SHADER );
-				var fragShaderString = "precision highp float; precision highp int; \t" + editor.getValue();
+				var fragShaderString = 
+					"precision highp float;" +
+					"uniform vec3 cameraPosition;" +
+					"\t" + 
+					editor.getValue();
 				gl.shaderSource( shader, fragShaderString );
 				gl.compileShader( shader );
 				if ( gl.getShaderInfoLog( shader ) !== '' ) {
