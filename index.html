@@ -13,6 +13,8 @@
 
 		</style>
 
+		<script src="js/cookie.js"></script>
+
 		<script src="js/jquery-latest.js"></script>
 		<script src="js/jquery-ui-latest.js"></script>
 		<script src="js/jquery.layout-latest.js"></script>
@@ -92,7 +94,7 @@
 			
 			var initCode = "";
 
-			if (document.cookie === "") {				
+			if (!checkCookie("code")) {				
 
 				initCode = 
 					"varying vec3 vNormal;\n" +
@@ -111,7 +113,8 @@
 			}
 			else {
 
-				initCode = document.cookie;
+				var encoded = getCookie("code");
+				initCode = decodeURIComponent(encoded);
 			}
 
 			var editor = CodeMirror.fromTextArea(
@@ -254,18 +257,21 @@
 				if ( gl.getShaderInfoLog( shader ) !== '' ) {
 					console.log(gl.getShaderInfoLog( shader ));
 				}
-				else {
-					save();
-				}
+
+				save();
 			}
 
-			function save() {
-				document.cookie = editor.getValue();
-				console.log("saved");
-			}
+			// set save()
+			save = function() {
+				var code = editor.getValue();
+				var encoded = encodeURIComponent(code);
+				setCookie("code", encoded, 5);
+				console.log("saved", document.cookie);
+			};
 
 			// set run()
 			run = updateShader;
+
 
 		</script>
 
